@@ -85,7 +85,8 @@ export default function NotificationSettings({ settings, onSave, onClose, onTest
             disabled={!enabled}
           />
           <div className="hint">
-            Get notified this many minutes before a task is due (0 = only at due time).
+            The alarm will trigger THIS MANY MINUTES before the task's due time. 
+            Set to 0 to get notified exactly at due time. Set to 5 to get notified 5 minutes before due time.
           </div>
         </div>
 
@@ -101,6 +102,16 @@ export default function NotificationSettings({ settings, onSave, onClose, onTest
             Test will play for 3 seconds then stop automatically.
           </div>
         </div>
+      </div>
+
+      <div className="notice" style={{ marginTop: "16px", fontSize: "12px" }}>
+        <strong>How it works:</strong> When you set "Notify before due time" to {notifyMinutesBefore} minutes, 
+        the alarm will trigger {notifyMinutesBefore === 0 ? "exactly at" : `${notifyMinutesBefore} minutes before`} 
+        the task's due time. For example, if a task is due at 10:30 AM, the alarm will sound at{" "}
+        {notifyMinutesBefore === 0 
+          ? "10:30 AM" 
+          : `${10 * 60 + 30 - parseInt(notifyMinutesBefore || 0) < 600 ? '0' : ''}${Math.floor((10 * 60 + 30 - parseInt(notifyMinutesBefore || 0)) / 60)}:${String((10 * 60 + 30 - parseInt(notifyMinutesBefore || 0)) % 60).padStart(2, '0')} AM`
+        }.
       </div>
 
       <div className="modal-footer">

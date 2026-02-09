@@ -160,6 +160,14 @@ function App() {
     };
   }, [isAuthed, tasks]);
 
+  // Expose notificationScheduler to window for debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.notificationScheduler = notificationScheduler;
+      console.log("Debug: notificationScheduler available in console. Try: notificationScheduler.clearDismissedNotifications()");
+    }
+  }, []);
+
   // PUBLIC_INTERFACE
   const refreshTasks = async () => {
     setTasksError("");

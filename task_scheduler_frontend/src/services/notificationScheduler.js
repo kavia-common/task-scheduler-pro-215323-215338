@@ -168,14 +168,33 @@ export class NotificationScheduler {
 
       const dueTime = new Date(task.due_at).getTime();
       if (Number.isNaN(dueTime)) {
+        console.warn(`Task ${task.id} has invalid due_at:`, task.due_at);
         return;
       }
 
+      // Calculate the reminder time (due time minus the notification threshold)
+      const reminderTime = dueTime - notifyThreshold;
+      const timeUntilReminder = reminderTime - now;
       const timeUntilDue = dueTime - now;
       
-      // Trigger notification if task is due within threshold or overdue
-      if (timeUntilDue <= notifyThreshold && timeUntilDue >= -60000) {
-        // Only notify if due in next X minutes or up to 1 minute overdue
+      // Trigger notification if:
+      // 1. Current time has passed or reached the reminder time (timeUntilReminder <= 0)
+      // 2. We haven't gone too far past the reminder time (within 2 minutes after reminder time)
+      // 3. Task is not overdue by more than 5 minutes
+      const twoMinutesInMs = 2 * 60 * 1000;
+      const fiveMinutesInMs = 5 * 60 * 1000;
+      
+      if (timeUntilReminder <= 0 && 
+          timeUntilReminder >= -twoMinutesInMs &&
+          timeUntilDue >= -fiveMinutesInMs) {
+        // Log for debugging
+        console.log(`Triggering notification for task "${task.title}":`, {
+          reminderTime: new Date(reminderTime).toLocaleString(),
+          dueTime: new Date(dueTime).toLocaleString(),
+          minutesUntilDue: Math.round(timeUntilDue / 60000),
+          notifyMinutesBefore: settings.notifyMinutesBefore
+        });
+        
         this.triggerNotification(task, timeUntilDue, settings);
       }
     });
@@ -185,9 +204,12 @@ export class NotificationScheduler {
    * Trigger notification for a task
    */
   async triggerNotification(task, timeUntilDue, settings) {
+    console.log(`Notification triggered for task "${task.title}" at ${new Date().toLocaleString()}`);
+    
     // Play alarm sound if enabled
     if (settings.soundEnabled) {
-      await this.playAlarm(settings.loopSound);
+      const soundPlayed = await this.playAlarm(settings.loopSound);
+      console.log(`Alarm sound ${soundPlayed ? 'played successfully' : 'failed to play'}`);
     }
 
     // Trigger on-screen notification
@@ -199,6 +221,7 @@ export class NotificationScheduler {
         task,
         isOverdue,
         minutesUntil,
+        reminderMinutesBefore: settings.notifyMinutesBefore,
         onDismiss: () => {
           markNotificationDismissed(task.id);
           this.stopAlarm();
@@ -276,6 +299,36 @@ export class NotificationScheduler {
       console.error("Test alarm failed:", e);
       return false;
     }
+  }
+
+  /**
+   * Clear all dismissed notifications (useful for testing)
+   */
+  clearDismissedNotifications() {
+    try {
+      localStorage.removeItem(DISMISSED_NOTIFICATIONS_KEY);
+      console.log("Cleared all dismissed notifications");
+    } catch (e) {
+      console.error("Failed to clear dismissed notifications:", e);
+    }
+  }
+
+  /**
+   * Get status of a task's notification state
+   */
+  getTaskNotificationStatus(taskId) {
+    const dismissed = getDismissedNotifications();
+    const dismissedTime = dismissed[taskId];
+    if (!dismissedTime) {
+      return { dismissed: false };
+    }
+    
+    const minutesAgo = Math.round((Date.now() - dismissedTime) / 60000);
+    return {
+      dismissed: true,
+      dismissedAt: new Date(dismissedTime).toLocaleString(),
+      minutesAgo: minutesAgo
+    };
   }
 }
 

@@ -8,13 +8,20 @@ import React from "react";
 export default function AlarmNotification({ notification, onDismiss, onViewTask }) {
   if (!notification) return null;
 
-  const { task, isOverdue, minutesUntil, onStop } = notification;
+  const { task, isOverdue, minutesUntil, reminderMinutesBefore, onStop } = notification;
 
   const getTimeText = () => {
     if (isOverdue) {
       return minutesUntil === 0 ? "Due now!" : `Overdue by ${minutesUntil} min`;
     }
     return minutesUntil === 0 ? "Due now!" : `Due in ${minutesUntil} min`;
+  };
+
+  const getReminderText = () => {
+    if (!reminderMinutesBefore || reminderMinutesBefore === 0) {
+      return "Reminder at due time";
+    }
+    return `Reminder ${reminderMinutesBefore} min before due`;
   };
 
   const getPriorityClass = () => {
@@ -53,9 +60,12 @@ export default function AlarmNotification({ notification, onDismiss, onViewTask 
             </span>
             {task.due_at ? (
               <span className="alarm-due-date">
-                {new Date(task.due_at).toLocaleString()}
+                Due: {new Date(task.due_at).toLocaleString()}
               </span>
             ) : null}
+            <span className="alarm-due-date" style={{ fontStyle: "italic", opacity: 0.8 }}>
+              {getReminderText()}
+            </span>
           </div>
         </div>
 
