@@ -45,6 +45,8 @@ export async function apiRequest({ path, method, headers = {}, body }) {
       headers: reqHeaders,
       body: hasBody ? JSON.stringify(body) : undefined,
       signal,
+      // Explicitly avoid cookie-based flows; this app uses Bearer tokens.
+      credentials: "omit",
     });
 
     const contentType = res.headers.get("content-type") || "";
@@ -60,10 +62,16 @@ export async function apiRequest({ path, method, headers = {}, body }) {
     }
 
     if (!res.ok) {
-      const msg =
-        (payload && typeof payload === "object" && (payload.detail || payload.message)) ||
-        (typeof payload === "string" && payload) ||
-        `Request failed (${res.status})`;
+      // FastAPI commonly returns {"detail": "..."} or {"detail":[{msg:...}]}
+      let msg = `Request failed (${res.status})`;
+      if (payload && typeof payload === "object") {
+        const detail = payload.detail ?? payload.message;
+        if (typeof detail === "string") msg = detail;
+        else if (Array.isArray(detail) && detail.length && detail[0]?.msg) msg = detail[0].msg;
+      } else if (typeof payload === "string" && payload) {
+        msg = payload;
+      }
+
       const err = new Error(msg);
       err.status = res.status;
       err.payload = payload;
