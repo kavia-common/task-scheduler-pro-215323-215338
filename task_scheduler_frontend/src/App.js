@@ -75,6 +75,7 @@ function App() {
   const [notificationSettings, setNotificationSettings] = useState(() =>
     notificationScheduler.getSettings()
   );
+  const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
 
   const apiBase = getApiBaseUrl();
 
@@ -167,6 +168,20 @@ function App() {
       console.log("Debug: notificationScheduler available in console. Try: notificationScheduler.clearDismissedNotifications()");
     }
   }, []);
+
+  // Check if we should prompt for desktop notification permission
+  useEffect(() => {
+    if (isAuthed && tasks.length > 0) {
+      // Check if we should show permission prompt
+      const settings = notificationScheduler.getSettings();
+      if (settings.enabled && settings.desktopNotifications && notificationScheduler.shouldPromptForPermission()) {
+        // Show prompt after a short delay to avoid overwhelming the user
+        setTimeout(() => {
+          setShowPermissionPrompt(true);
+        }, 2000);
+      }
+    }
+  }, [isAuthed, tasks]);
 
   // PUBLIC_INTERFACE
   const refreshTasks = async () => {
@@ -446,6 +461,36 @@ function App() {
     }
   };
 
+  // PUBLIC_INTERFACE
+  const handleEnableDesktopNotifications = async () => {
+    const permission = await notificationScheduler.requestPermission();
+    setShowPermissionPrompt(false);
+    
+    if (permission === "granted") {
+      addToast({
+        type: "success",
+        title: "Desktop notifications enabled",
+        message: "You'll receive alerts even when this tab is in the background!",
+      });
+    } else if (permission === "denied") {
+      addToast({
+        type: "warn",
+        title: "Permission denied",
+        message: "You can enable notifications later in settings.",
+      });
+    }
+  };
+
+  // PUBLIC_INTERFACE
+  const handleDismissPermissionPrompt = () => {
+    setShowPermissionPrompt(false);
+    addToast({
+      type: "info",
+      title: "Notification prompt dismissed",
+      message: "You can enable desktop notifications anytime in settings (🔔 icon).",
+    });
+  };
+
   return (
     <div className="App">
       <div className="retro-grid" />
@@ -612,6 +657,40 @@ function App() {
             onClose={() => setNotificationSettingsOpen(false)}
             onTestAlarm={handleTestAlarm}
           />
+        </Modal>
+      ) : null}
+
+      {showPermissionPrompt ? (
+        <Modal
+          title="Enable Desktop Notifications?"
+          onClose={handleDismissPermissionPrompt}
+        >
+          <div className="modal-body">
+            <div style={{ fontSize: "14px", lineHeight: "1.6", marginBottom: "16px" }}>
+              <p style={{ margin: "0 0 12px 0" }}>
+                <strong>Never miss a task deadline!</strong>
+              </p>
+              <p style={{ margin: "0 0 12px 0" }}>
+                Enable desktop notifications to receive alerts even when you're on a different tab or window.
+              </p>
+              <ul style={{ margin: "0 0 12px 16px", paddingLeft: "16px" }}>
+                <li>Get notified even when this tab is in the background</li>
+                <li>Alarms work reliably across all tabs</li>
+                <li>Click notifications to quickly view tasks</li>
+              </ul>
+              <p style={{ margin: "0", fontSize: "12px", color: "var(--muted)" }}>
+                You can change this setting anytime from the notification settings (🔔 icon).
+              </p>
+            </div>
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-ghost" onClick={handleDismissPermissionPrompt}>
+              Not now
+            </button>
+            <button className="btn btn-primary" onClick={handleEnableDesktopNotifications}>
+              🔔 Enable Notifications
+            </button>
+          </div>
         </Modal>
       ) : null}
     </div>

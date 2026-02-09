@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 /**
  * Notification settings modal for configuring alarm preferences.
@@ -8,13 +8,83 @@ export default function NotificationSettings({ settings, onSave, onClose, onTest
   const [enabled, setEnabled] = useState(settings.enabled);
   const [soundEnabled, setSoundEnabled] = useState(settings.soundEnabled);
   const [loopSound, setLoopSound] = useState(settings.loopSound || false);
+  const [desktopNotifications, setDesktopNotifications] = useState(
+    settings.desktopNotifications !== undefined ? settings.desktopNotifications : true
+  );
   const [notifyMinutesBefore, setNotifyMinutesBefore] = useState(settings.notifyMinutesBefore);
+  const [permissionState, setPermissionState] = useState("checking");
+
+  useEffect(() => {
+    // Check notification permission on mount
+    if ("Notification" in window) {
+      setPermissionState(Notification.permission);
+    } else {
+      setPermissionState("unsupported");
+    }
+  }, []);
+
+  const handleRequestPermission = async () => {
+    if (!("Notification" in window)) {
+      alert("Desktop notifications are not supported in your browser.");
+      return;
+    }
+
+    if (Notification.permission === "granted") {
+      alert("Permission already granted!");
+      return;
+    }
+
+    if (Notification.permission === "denied") {
+      alert(
+        "Desktop notifications are blocked. Please enable them in your browser settings:\n\n" +
+        "Chrome/Edge: Click the lock icon in the address bar\n" +
+        "Firefox: Click the shield icon in the address bar\n" +
+        "Safari: Check Safari > Settings > Websites > Notifications"
+      );
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      setPermissionState(permission);
+      
+      if (permission === "granted") {
+        // Show a test notification
+        new Notification("Desktop Notifications Enabled! 🎉", {
+          body: "You'll now receive desktop alerts for task reminders.",
+          icon: "/favicon.ico",
+        });
+      } else {
+        alert("Permission denied. Desktop notifications will not work.");
+      }
+    } catch (e) {
+      console.error("Failed to request permission:", e);
+      alert("Failed to request notification permission. Please try again.");
+    }
+  };
+
+  const getPermissionStatusText = () => {
+    if (permissionState === "unsupported") {
+      return "❌ Not supported in this browser";
+    }
+    if (permissionState === "granted") {
+      return "✅ Granted";
+    }
+    if (permissionState === "denied") {
+      return "🚫 Blocked (check browser settings)";
+    }
+    if (permissionState === "default") {
+      return "⚠️ Not yet requested";
+    }
+    return "Checking...";
+  };
 
   const handleSave = () => {
     onSave({
       enabled,
       soundEnabled,
       loopSound,
+      desktopNotifications,
       notifyMinutesBefore: parseInt(notifyMinutesBefore, 10) || 5,
     });
   };
@@ -73,6 +143,56 @@ export default function NotificationSettings({ settings, onSave, onClose, onTest
         </div>
 
         <div className="field">
+          <label htmlFor="desktop-notifications" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <input
+              type="checkbox"
+              id="desktop-notifications"
+              checked={desktopNotifications}
+              onChange={(e) => setDesktopNotifications(e.target.checked)}
+              disabled={!enabled}
+              style={{ width: "auto" }}
+            />
+            Desktop notifications
+          </label>
+          <div className="hint">
+            Show native desktop notifications even when tab is in background.
+            <strong> Works even if you switch tabs!</strong>
+          </div>
+        </div>
+
+        {desktopNotifications && enabled && (
+          <div className="field" style={{ 
+            padding: "12px", 
+            borderRadius: "12px", 
+            border: "1px solid rgba(34, 211, 238, 0.2)",
+            background: "rgba(7, 10, 19, 0.3)"
+          }}>
+            <div style={{ marginBottom: "8px", fontSize: "13px", fontWeight: "700" }}>
+              Desktop Permission Status: {getPermissionStatusText()}
+            </div>
+            {permissionState === "default" && (
+              <button
+                className="btn btn-primary btn-small"
+                onClick={handleRequestPermission}
+                style={{ marginTop: "8px" }}
+              >
+                🔔 Request Permission
+              </button>
+            )}
+            {permissionState === "denied" && (
+              <div style={{ marginTop: "8px", fontSize: "12px", color: "rgba(239, 68, 68, 0.95)" }}>
+                Please enable notifications in your browser settings to use this feature.
+              </div>
+            )}
+            {permissionState === "granted" && (
+              <div style={{ marginTop: "8px", fontSize: "12px", color: "rgba(163, 230, 53, 0.95)" }}>
+                Desktop notifications are enabled and will work even when you switch tabs or windows!
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="field">
           <label htmlFor="notify-minutes">Notify before due time (minutes)</label>
           <input
             type="number"
@@ -112,6 +232,10 @@ export default function NotificationSettings({ settings, onSave, onClose, onTest
           ? "10:30 AM" 
           : `${10 * 60 + 30 - parseInt(notifyMinutesBefore || 0) < 600 ? '0' : ''}${Math.floor((10 * 60 + 30 - parseInt(notifyMinutesBefore || 0)) / 60)}:${String((10 * 60 + 30 - parseInt(notifyMinutesBefore || 0)) % 60).padStart(2, '0')} AM`
         }.
+      </div>
+
+      <div className="notice" style={{ marginTop: "12px", fontSize: "12px", borderColor: "rgba(163, 230, 53, 0.25)", background: "rgba(163, 230, 53, 0.08)", color: "rgba(163, 230, 53, 0.95)" }}>
+        <strong>🎉 Background Tab Support:</strong> With desktop notifications enabled, alarms will trigger even when you're on a different tab or window!
       </div>
 
       <div className="modal-footer">
