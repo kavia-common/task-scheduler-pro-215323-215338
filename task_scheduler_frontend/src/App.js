@@ -9,6 +9,9 @@ import Modal from "./components/Modal";
 import TaskForm from "./components/TaskForm";
 import Sidebar from "./components/Sidebar";
 import TaskTable from "./components/TaskTable";
+import AlarmNotification from "./components/AlarmNotification";
+import NotificationSettings from "./components/NotificationSettings";
+import { notificationScheduler } from "./services/notificationScheduler";
 
 /**
  * NOTE ABOUT BACKEND INTEGRATION
@@ -66,6 +69,12 @@ function App() {
   const [activeTask, setActiveTask] = useState(null);
 
   const [confirmDeleteTask, setConfirmDeleteTask] = useState(null);
+
+  const [alarmNotification, setAlarmNotification] = useState(null);
+  const [notificationSettingsOpen, setNotificationSettingsOpen] = useState(false);
+  const [notificationSettings, setNotificationSettings] = useState(() =>
+    notificationScheduler.getSettings()
+  );
 
   const apiBase = getApiBaseUrl();
 
@@ -136,6 +145,20 @@ function App() {
     refreshTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthed]);
+
+  useEffect(() => {
+    // Start notification scheduler when authenticated with tasks
+    if (isAuthed && tasks.length > 0) {
+      notificationScheduler.start(tasks, (notification) => {
+        setAlarmNotification(notification);
+      });
+    }
+
+    return () => {
+      // Stop scheduler on unmount or when logging out
+      notificationScheduler.stop();
+    };
+  }, [isAuthed, tasks]);
 
   // PUBLIC_INTERFACE
   const refreshTasks = async () => {
@@ -369,6 +392,52 @@ function App() {
     setRoute((r) => (r === ROUTES.LOGIN ? ROUTES.SIGNUP : ROUTES.LOGIN));
   };
 
+  // PUBLIC_INTERFACE
+  const handleDismissAlarm = () => {
+    if (alarmNotification?.onDismiss) {
+      alarmNotification.onDismiss();
+    }
+    setAlarmNotification(null);
+  };
+
+  // PUBLIC_INTERFACE
+  const handleViewAlarmTask = () => {
+    if (alarmNotification?.task) {
+      openEditTask(alarmNotification.task);
+    }
+    setAlarmNotification(null);
+  };
+
+  // PUBLIC_INTERFACE
+  const handleSaveNotificationSettings = (newSettings) => {
+    const updated = notificationScheduler.updateSettings(newSettings);
+    setNotificationSettings(updated);
+    setNotificationSettingsOpen(false);
+    addToast({
+      type: "success",
+      title: "Settings saved",
+      message: "Notification preferences updated.",
+    });
+  };
+
+  // PUBLIC_INTERFACE
+  const handleTestAlarm = () => {
+    const success = notificationScheduler.testAlarm();
+    if (success) {
+      addToast({
+        type: "info",
+        title: "Test alarm",
+        message: "If you heard a beep, sound is working!",
+      });
+    } else {
+      addToast({
+        type: "error",
+        title: "Sound test failed",
+        message: "Unable to play alarm sound.",
+      });
+    }
+  };
+
   return (
     <div className="App">
       <div className="retro-grid" />
@@ -397,6 +466,13 @@ function App() {
 
             {isAuthed ? (
               <>
+                <button
+                  className="btn btn-small btn-ghost"
+                  onClick={() => setNotificationSettingsOpen(true)}
+                  title="Notification settings"
+                >
+                  🔔
+                </button>
                 <button className="btn btn-small btn-ghost" onClick={refreshTasks}>
                   Refresh
                 </button>
@@ -508,6 +584,28 @@ function App() {
         toasts={toasts}
         onDismiss={(id) => dispatchToast({ type: "REMOVE", id })}
       />
+
+      {alarmNotification ? (
+        <AlarmNotification
+          notification={alarmNotification}
+          onDismiss={handleDismissAlarm}
+          onViewTask={handleViewAlarmTask}
+        />
+      ) : null}
+
+      {notificationSettingsOpen ? (
+        <Modal
+          title="Notification Settings"
+          onClose={() => setNotificationSettingsOpen(false)}
+        >
+          <NotificationSettings
+            settings={notificationSettings}
+            onSave={handleSaveNotificationSettings}
+            onClose={() => setNotificationSettingsOpen(false)}
+            onTestAlarm={handleTestAlarm}
+          />
+        </Modal>
+      ) : null}
     </div>
   );
 }
