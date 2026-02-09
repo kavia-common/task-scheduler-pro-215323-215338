@@ -5,10 +5,10 @@ import React from "react";
  * Displays prominently with task details and action buttons.
  */
 // PUBLIC_INTERFACE
-export default function AlarmNotification({ notification, onDismiss, onViewTask, onSnooze }) {
+export default function AlarmNotification({ notification, onDismiss, onViewTask }) {
   if (!notification) return null;
 
-  const { task, isOverdue, minutesUntil } = notification;
+  const { task, isOverdue, minutesUntil, onStop } = notification;
 
   const getTimeText = () => {
     if (isOverdue) {
@@ -23,6 +23,12 @@ export default function AlarmNotification({ notification, onDismiss, onViewTask,
     if (p === "medium") return "cyan";
     if (p === "low") return "blue";
     return "cyan";
+  };
+
+  const handleStopAlarm = () => {
+    if (onStop) {
+      onStop();
+    }
   };
 
   return (
@@ -54,6 +60,9 @@ export default function AlarmNotification({ notification, onDismiss, onViewTask,
         </div>
 
         <div className="alarm-actions">
+          <button className="btn btn-ghost" onClick={handleStopAlarm} title="Stop alarm sound">
+            🔇 Stop Alarm
+          </button>
           <button className="btn btn-ghost" onClick={onDismiss}>
             Dismiss
           </button>

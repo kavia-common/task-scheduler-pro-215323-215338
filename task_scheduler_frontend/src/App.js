@@ -421,19 +421,19 @@ function App() {
   };
 
   // PUBLIC_INTERFACE
-  const handleTestAlarm = () => {
-    const success = notificationScheduler.testAlarm();
+  const handleTestAlarm = async () => {
+    const success = await notificationScheduler.testAlarm();
     if (success) {
       addToast({
         type: "info",
         title: "Test alarm",
-        message: "If you heard a beep, sound is working!",
+        message: "Playing for 3 seconds. If you heard it, sound is working!",
       });
     } else {
       addToast({
         type: "error",
         title: "Sound test failed",
-        message: "Unable to play alarm sound.",
+        message: "Unable to play alarm sound. Check browser console.",
       });
     }
   };

@@ -4,6 +4,8 @@
  * Triggers alarm sound and on-screen alerts when tasks are due.
  */
 
+import { audioService } from "./audioService";
+
 const NOTIFICATION_SETTINGS_KEY = "task_scheduler_notification_settings";
 const DISMISSED_NOTIFICATIONS_KEY = "task_scheduler_dismissed_notifications";
 
@@ -18,6 +20,7 @@ function getNotificationSettings() {
       : {
           enabled: true,
           soundEnabled: true,
+          loopSound: false,
           notifyMinutesBefore: 5,
           repeatInterval: 0, // 0 = no repeat
         };
@@ -25,6 +28,7 @@ function getNotificationSettings() {
     return {
       enabled: true,
       soundEnabled: true,
+      loopSound: false,
       notifyMinutesBefore: 5,
       repeatInterval: 0,
     };
@@ -83,58 +87,6 @@ function wasRecentlyDismissed(taskId) {
   }
 }
 
-/**
- * Generate alarm sound using Web Audio API
- */
-function generateAlarmSound(duration = 2000) {
-  try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Create a beeping pattern (alternating frequencies)
-    oscillator.frequency.value = 800;
-    oscillator.type = "sine";
-    
-    // Fade in/out for smoother sound
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
-    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + duration / 1000 - 0.1);
-    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration / 1000);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + duration / 1000);
-    
-    // Create alternating beep pattern
-    setTimeout(() => {
-      try {
-        const osc2 = audioContext.createOscillator();
-        const gain2 = audioContext.createGain();
-        osc2.connect(gain2);
-        gain2.connect(audioContext.destination);
-        osc2.frequency.value = 1000;
-        osc2.type = "sine";
-        gain2.gain.setValueAtTime(0, audioContext.currentTime);
-        gain2.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.05);
-        gain2.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
-        osc2.start(audioContext.currentTime);
-        osc2.stop(audioContext.currentTime + 0.3);
-      } catch {
-        // ignore
-      }
-    }, 400);
-    
-    return true;
-  } catch (e) {
-    console.error("Failed to generate alarm sound:", e);
-    return false;
-  }
-}
-
 // PUBLIC_INTERFACE
 export class NotificationScheduler {
   /**
@@ -174,6 +126,8 @@ export class NotificationScheduler {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
+    // Stop any playing alarm sound
+    this.stopAlarm();
   }
 
   /**
@@ -230,10 +184,10 @@ export class NotificationScheduler {
   /**
    * Trigger notification for a task
    */
-  triggerNotification(task, timeUntilDue, settings) {
+  async triggerNotification(task, timeUntilDue, settings) {
     // Play alarm sound if enabled
     if (settings.soundEnabled) {
-      generateAlarmSound(1500);
+      await this.playAlarm(settings.loopSound);
     }
 
     // Trigger on-screen notification
@@ -247,12 +201,45 @@ export class NotificationScheduler {
         minutesUntil,
         onDismiss: () => {
           markNotificationDismissed(task.id);
+          this.stopAlarm();
+        },
+        onStop: () => {
+          this.stopAlarm();
         },
       });
     }
 
     // Mark as notified to avoid repeated notifications within the check interval
     markNotificationDismissed(task.id);
+  }
+
+  /**
+   * Play alarm sound
+   * @param {boolean} loop - Whether to loop the alarm
+   * @returns {Promise<boolean>}
+   */
+  async playAlarm(loop = false) {
+    try {
+      return await audioService.play("/assets/alarm.mp3", loop);
+    } catch (e) {
+      console.error("Failed to play alarm:", e);
+      return false;
+    }
+  }
+
+  /**
+   * Stop alarm sound
+   */
+  stopAlarm() {
+    audioService.stop();
+  }
+
+  /**
+   * Check if alarm is currently playing
+   * @returns {boolean}
+   */
+  isAlarmPlaying() {
+    return audioService.getIsPlaying();
   }
 
   /**
@@ -275,8 +262,20 @@ export class NotificationScheduler {
   /**
    * Test alarm sound
    */
-  testAlarm() {
-    return generateAlarmSound(1500);
+  async testAlarm() {
+    try {
+      // Play for 3 seconds then stop
+      const success = await audioService.play("/assets/alarm.mp3", false);
+      if (success) {
+        setTimeout(() => {
+          audioService.stop();
+        }, 3000);
+      }
+      return success;
+    } catch (e) {
+      console.error("Test alarm failed:", e);
+      return false;
+    }
   }
 }
 

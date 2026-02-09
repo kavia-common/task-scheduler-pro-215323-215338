@@ -7,12 +7,14 @@ import React, { useState } from "react";
 export default function NotificationSettings({ settings, onSave, onClose, onTestAlarm }) {
   const [enabled, setEnabled] = useState(settings.enabled);
   const [soundEnabled, setSoundEnabled] = useState(settings.soundEnabled);
+  const [loopSound, setLoopSound] = useState(settings.loopSound || false);
   const [notifyMinutesBefore, setNotifyMinutesBefore] = useState(settings.notifyMinutesBefore);
 
   const handleSave = () => {
     onSave({
       enabled,
       soundEnabled,
+      loopSound,
       notifyMinutesBefore: parseInt(notifyMinutesBefore, 10) || 5,
     });
   };
@@ -54,6 +56,23 @@ export default function NotificationSettings({ settings, onSave, onClose, onTest
         </div>
 
         <div className="field">
+          <label htmlFor="loop-sound" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <input
+              type="checkbox"
+              id="loop-sound"
+              checked={loopSound}
+              onChange={(e) => setLoopSound(e.target.checked)}
+              disabled={!enabled || !soundEnabled}
+              style={{ width: "auto" }}
+            />
+            Loop alarm sound
+          </label>
+          <div className="hint">
+            Continuously repeat the alarm until dismissed or stopped.
+          </div>
+        </div>
+
+        <div className="field">
           <label htmlFor="notify-minutes">Notify before due time (minutes)</label>
           <input
             type="number"
@@ -78,6 +97,9 @@ export default function NotificationSettings({ settings, onSave, onClose, onTest
           >
             🔊 Test alarm sound
           </button>
+          <div className="hint">
+            Test will play for 3 seconds then stop automatically.
+          </div>
         </div>
       </div>
 
