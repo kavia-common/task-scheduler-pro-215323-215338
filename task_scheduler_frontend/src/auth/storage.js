@@ -1,14 +1,12 @@
+import { mockAuth } from "./mockAuth";
+
 const TOKEN_KEY = "task_scheduler_token";
 
 // PUBLIC_INTERFACE
 export const authStorage = {
   /** Get persisted auth token (JWT/Bearer). */
   getToken() {
-    try {
-      return window.localStorage.getItem(TOKEN_KEY);
-    } catch {
-      return null;
-    }
+    return mockAuth.getToken();
   },
 
   /** Persist auth token (JWT/Bearer). */
@@ -22,10 +20,6 @@ export const authStorage = {
 
   /** Clear persisted token. */
   clearToken() {
-    try {
-      window.localStorage.removeItem(TOKEN_KEY);
-    } catch {
-      // ignore
-    }
+    mockAuth.logout();
   },
 };
