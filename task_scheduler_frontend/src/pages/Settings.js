@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import NotificationSettings from "../components/NotificationSettings";
+import { getThemeOptions } from "../hooks/useTheme";
 
 /**
  * Settings page component - houses all application settings including
@@ -10,7 +11,9 @@ export default function Settings({
   notificationSettings, 
   onSaveNotificationSettings, 
   onTestAlarm,
-  onBack 
+  onBack,
+  currentTheme,
+  onThemeChange
 }) {
   const [activeTab, setActiveTab] = useState("general");
   
@@ -24,10 +27,7 @@ export default function Settings({
     lastActivity: new Date().toISOString()
   });
 
-  // Appearance settings state
-  const [themeMode, setThemeMode] = useState(
-    localStorage.getItem("theme_mode") || "retro-dark"
-  );
+  // Appearance settings state - use props from parent
   const [animations, setAnimations] = useState(
     localStorage.getItem("animations_enabled") !== "false"
   );
@@ -35,12 +35,14 @@ export default function Settings({
     localStorage.getItem("compact_mode") === "true"
   );
 
+  // Get available theme options
+  const themeOptions = getThemeOptions();
+
   // Handle theme change
   const handleThemeChange = (newTheme) => {
-    setThemeMode(newTheme);
-    localStorage.setItem("theme_mode", newTheme);
-    // Apply theme class to body (for future theme implementation)
-    document.body.setAttribute("data-theme", newTheme);
+    if (onThemeChange) {
+      onThemeChange(newTheme);
+    }
   };
 
   // Handle animations toggle
@@ -249,7 +251,7 @@ export default function Settings({
                       onClick={() => {
                         const data = {
                           profile: userProfile,
-                          theme: themeMode,
+                          theme: currentTheme,
                           animations: animations,
                           compactMode: compactMode,
                           notifications: notificationSettings
@@ -284,64 +286,34 @@ export default function Settings({
                 {/* Theme Selection */}
                 <div className="settings-group">
                   <h3 className="settings-group-title">Theme</h3>
+                  <div className="hint" style={{ marginBottom: "16px" }}>
+                    Choose your visual style. Changes apply instantly across the entire application.
+                  </div>
                   
                   <div className="theme-selector">
-                    <div 
-                      className={`theme-option ${themeMode === "retro-dark" ? "active" : ""}`}
-                      onClick={() => handleThemeChange("retro-dark")}
-                      role="button"
-                      tabIndex={0}
-                      onKeyPress={(e) => e.key === 'Enter' && handleThemeChange("retro-dark")}
-                    >
-                      <div className="theme-preview retro-dark-preview">
-                        <div className="preview-colors">
-                          <span style={{ background: "#0b1020" }}></span>
-                          <span style={{ background: "#22d3ee" }}></span>
-                          <span style={{ background: "#fb7185" }}></span>
+                    {themeOptions.map((themeOption) => (
+                      <div
+                        key={themeOption.id}
+                        className={`theme-option ${currentTheme === themeOption.id ? "active" : ""} ${!themeOption.available ? "disabled" : ""}`}
+                        onClick={() => themeOption.available && handleThemeChange(themeOption.id)}
+                        role="button"
+                        tabIndex={themeOption.available ? 0 : -1}
+                        onKeyPress={(e) => e.key === 'Enter' && themeOption.available && handleThemeChange(themeOption.id)}
+                        aria-disabled={!themeOption.available}
+                        style={{ cursor: themeOption.available ? "pointer" : "not-allowed", opacity: themeOption.available ? 1 : 0.6 }}
+                      >
+                        <div className={`theme-preview ${themeOption.id}-preview`}>
+                          <div className="preview-colors">
+                            {themeOption.colors.map((color, idx) => (
+                              <span key={idx} style={{ background: color }}></span>
+                            ))}
+                          </div>
                         </div>
+                        <div className="theme-name">{themeOption.name}</div>
+                        <div className="theme-description">{themeOption.description}</div>
+                        {currentTheme === themeOption.id && <div className="theme-badge">Active</div>}
                       </div>
-                      <div className="theme-name">Retro Dark</div>
-                      <div className="theme-description">Classic cyberpunk aesthetic</div>
-                      {themeMode === "retro-dark" && <div className="theme-badge">Active</div>}
-                    </div>
-
-                    <div 
-                      className={`theme-option ${themeMode === "retro-light" ? "active" : ""}`}
-                      onClick={() => handleThemeChange("retro-light")}
-                      role="button"
-                      tabIndex={0}
-                      onKeyPress={(e) => e.key === 'Enter' && handleThemeChange("retro-light")}
-                    >
-                      <div className="theme-preview retro-light-preview">
-                        <div className="preview-colors">
-                          <span style={{ background: "#f9fafb" }}></span>
-                          <span style={{ background: "#3b82f6" }}></span>
-                          <span style={{ background: "#06b6d4" }}></span>
-                        </div>
-                      </div>
-                      <div className="theme-name">Retro Light</div>
-                      <div className="theme-description">Coming soon</div>
-                      {themeMode === "retro-light" && <div className="theme-badge">Active</div>}
-                    </div>
-
-                    <div 
-                      className={`theme-option ${themeMode === "neon-purple" ? "active" : ""}`}
-                      onClick={() => handleThemeChange("neon-purple")}
-                      role="button"
-                      tabIndex={0}
-                      onKeyPress={(e) => e.key === 'Enter' && handleThemeChange("neon-purple")}
-                    >
-                      <div className="theme-preview neon-purple-preview">
-                        <div className="preview-colors">
-                          <span style={{ background: "#1a0b2e" }}></span>
-                          <span style={{ background: "#a855f7" }}></span>
-                          <span style={{ background: "#ec4899" }}></span>
-                        </div>
-                      </div>
-                      <div className="theme-name">Neon Purple</div>
-                      <div className="theme-description">Coming soon</div>
-                      {themeMode === "neon-purple" && <div className="theme-badge">Active</div>}
-                    </div>
+                    ))}
                   </div>
                 </div>
 

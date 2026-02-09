@@ -1,0 +1,189 @@
+/* Theme System - CSS Variables for Light Retro and Dark Retro themes */
+
+/* ============================================
+   DARK RETRO THEME (DEFAULT)
+   ============================================ */
+[data-theme="retro-dark"],
+body:not([data-theme]) {
+  /* Core colors */
+  --bg: #0b1020;
+  --bg-darker: #070a13;
+  --panel: rgba(15, 23, 42, 0.85);
+  --panel-solid: #0f172a;
+  --text: #e5e7eb;
+  --text-bright: #f9fafb;
+  --muted: rgba(229, 231, 235, 0.7);
+  --muted-light: rgba(229, 231, 235, 0.55);
+
+  /* Neon accent colors */
+  --neon-cyan: #22d3ee;
+  --neon-cyan-bright: #67e8f9;
+  --neon-blue: #3b82f6;
+  --neon-pink: #fb7185;
+  --neon-pink-bright: #fda4af;
+  --neon-lime: #a3e635;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+
+  /* Borders */
+  --border: rgba(34, 211, 238, 0.25);
+  --border-strong: rgba(34, 211, 238, 0.5);
+  --border-subtle: rgba(34, 211, 238, 0.12);
+
+  /* Shadows and effects */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --glow-cyan: 0 0 20px rgba(34, 211, 238, 0.4);
+  --glow-pink: 0 0 20px rgba(251, 113, 133, 0.4);
+
+  /* Background gradients */
+  --bg-gradient: radial-gradient(1200px 700px at 70% -20%, rgba(34, 211, 238, 0.15), transparent 55%),
+    radial-gradient(900px 600px at 20% 0%, rgba(251, 113, 133, 0.12), transparent 45%),
+    linear-gradient(180deg, var(--bg-darker), var(--bg) 40%, var(--bg-darker));
+
+  /* Grid opacity */
+  --grid-opacity: 0.25;
+  --grid-color: rgba(34, 211, 238, 0.12);
+}
+
+/* ============================================
+   LIGHT RETRO THEME
+   ============================================ */
+[data-theme="retro-light"] {
+  /* Core colors */
+  --bg: #f9fafb;
+  --bg-darker: #f3f4f6;
+  --panel: rgba(255, 255, 255, 0.85);
+  --panel-solid: #ffffff;
+  --text: #1f2937;
+  --text-bright: #111827;
+  --muted: rgba(31, 41, 55, 0.7);
+  --muted-light: rgba(31, 41, 55, 0.55);
+
+  /* Neon accent colors - adjusted for light theme */
+  --neon-cyan: #06b6d4;
+  --neon-cyan-bright: #0891b2;
+  --neon-blue: #3b82f6;
+  --neon-pink: #ec4899;
+  --neon-pink-bright: #db2777;
+  --neon-lime: #84cc16;
+  --danger: #dc2626;
+  --warning: #ea580c;
+  --success: #059669;
+
+  /* Borders */
+  --border: rgba(59, 130, 246, 0.25);
+  --border-strong: rgba(59, 130, 246, 0.5);
+  --border-subtle: rgba(59, 130, 246, 0.12);
+
+  /* Shadows and effects */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+  --glow-cyan: 0 0 16px rgba(6, 182, 212, 0.3);
+  --glow-pink: 0 0 16px rgba(236, 72, 153, 0.3);
+
+  /* Background gradients */
+  --bg-gradient: radial-gradient(1200px 700px at 70% -20%, rgba(59, 130, 246, 0.08), transparent 55%),
+    radial-gradient(900px 600px at 20% 0%, rgba(6, 182, 212, 0.06), transparent 45%),
+    linear-gradient(180deg, var(--bg-darker), var(--bg) 40%, var(--bg-darker));
+
+  /* Grid opacity */
+  --grid-opacity: 0.15;
+  --grid-color: rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================
+   NEON PURPLE THEME (PLACEHOLDER)
+   ============================================ */
+[data-theme="neon-purple"] {
+  /* Core colors */
+  --bg: #1a0b2e;
+  --bg-darker: #0f0620;
+  --panel: rgba(29, 17, 53, 0.85);
+  --panel-solid: #1d1135;
+  --text: #e9d5ff;
+  --text-bright: #f5e8ff;
+  --muted: rgba(233, 213, 255, 0.7);
+  --muted-light: rgba(233, 213, 255, 0.55);
+
+  /* Neon accent colors */
+  --neon-cyan: #c084fc;
+  --neon-cyan-bright: #d8b4fe;
+  --neon-blue: #a855f7;
+  --neon-pink: #ec4899;
+  --neon-pink-bright: #f472b6;
+  --neon-lime: #c4b5fd;
+  --danger: #f43f5e;
+  --warning: #fb923c;
+  --success: #22d3ee;
+
+  /* Borders */
+  --border: rgba(168, 85, 247, 0.25);
+  --border-strong: rgba(168, 85, 247, 0.5);
+  --border-subtle: rgba(168, 85, 247, 0.12);
+
+  /* Shadows and effects */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.65);
+  --glow-cyan: 0 0 20px rgba(192, 132, 252, 0.4);
+  --glow-pink: 0 0 20px rgba(236, 72, 153, 0.4);
+
+  /* Background gradients */
+  --bg-gradient: radial-gradient(1200px 700px at 70% -20%, rgba(168, 85, 247, 0.15), transparent 55%),
+    radial-gradient(900px 600px at 20% 0%, rgba(236, 72, 153, 0.12), transparent 45%),
+    linear-gradient(180deg, var(--bg-darker), var(--bg) 40%, var(--bg-darker));
+
+  /* Grid opacity */
+  --grid-opacity: 0.25;
+  --grid-color: rgba(168, 85, 247, 0.12);
+}
+
+/* ============================================
+   SHARED THEME VARIABLES
+   ============================================ */
+:root {
+  /* Border radius */
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 22px;
+
+  /* Typography */
+  --font-sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Focus ring */
+  --focus: 0 0 0 4px rgba(34, 211, 238, 0.22);
+  --focus-strong: 0 0 0 4px rgba(34, 211, 238, 0.35);
+
+  /* Spacing scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+
+  /* Transitions */
+  --transition-fast: 120ms;
+  --transition: 200ms;
+  --transition-slow: 300ms;
+}
+
+/* Update body background to use CSS variable */
+body {
+  background: var(--bg-gradient);
+  color: var(--text);
+  transition: background-color var(--transition-slow) ease, color var(--transition) ease;
+}
+
+/* Update retro grid to use CSS variable */
+.retro-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+  opacity: var(--grid-opacity);
+}

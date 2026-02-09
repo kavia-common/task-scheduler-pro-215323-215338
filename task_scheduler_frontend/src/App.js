@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useReducer, useState } from "react";
+import "./theme.css";
 import "./App.css";
 
 import { apiRequest, getApiBaseUrl } from "./api/client";
+import { useTheme } from "./hooks/useTheme";
 import { authStorage } from "./auth/storage";
 import { validateEmail, validatePassword, validateRequired } from "./utils/validation";
 import ToastStack from "./components/ToastStack";
@@ -52,6 +54,24 @@ function App() {
 
   const [authToken, setAuthToken] = useState(() => authStorage.getToken());
   const isAuthed = Boolean(authToken);
+
+  // Theme management
+  const { theme, setTheme } = useTheme();
+
+  // Handle theme change with user feedback
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    const themeNames = {
+      "retro-dark": "Dark Retro",
+      "retro-light": "Light Retro",
+      "neon-purple": "Neon Purple"
+    };
+    addToast({
+      type: "success",
+      title: "Theme changed",
+      message: `Switched to ${themeNames[newTheme] || newTheme} theme.`,
+    });
+  };
 
   const [toasts, dispatchToast] = useReducer(toastReducer, initialToasts);
 
@@ -550,6 +570,8 @@ function App() {
           onSaveNotificationSettings={handleSaveNotificationSettings}
           onTestAlarm={handleTestAlarm}
           onBack={() => setRoute(ROUTES.DASHBOARD)}
+          currentTheme={theme}
+          onThemeChange={handleThemeChange}
         />
       ) : (
         <div className="container">
