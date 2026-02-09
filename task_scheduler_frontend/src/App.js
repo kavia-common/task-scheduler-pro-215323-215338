@@ -10,7 +10,7 @@ import TaskForm from "./components/TaskForm";
 import Sidebar from "./components/Sidebar";
 import TaskTable from "./components/TaskTable";
 import AlarmNotification from "./components/AlarmNotification";
-import NotificationSettings from "./components/NotificationSettings";
+import Settings from "./pages/Settings";
 import { notificationScheduler } from "./services/notificationScheduler";
 
 /**
@@ -25,6 +25,7 @@ const ROUTES = {
   LOGIN: "login",
   SIGNUP: "signup",
   DASHBOARD: "dashboard",
+  SETTINGS: "settings",
 };
 
 const initialToasts = [];
@@ -71,7 +72,6 @@ function App() {
   const [confirmDeleteTask, setConfirmDeleteTask] = useState(null);
 
   const [alarmNotification, setAlarmNotification] = useState(null);
-  const [notificationSettingsOpen, setNotificationSettingsOpen] = useState(false);
   const [notificationSettings, setNotificationSettings] = useState(() =>
     notificationScheduler.getSettings()
   );
@@ -435,7 +435,7 @@ function App() {
   const handleSaveNotificationSettings = (newSettings) => {
     const updated = notificationScheduler.updateSettings(newSettings);
     setNotificationSettings(updated);
-    setNotificationSettingsOpen(false);
+    setRoute(ROUTES.DASHBOARD);
     addToast({
       type: "success",
       title: "Settings saved",
@@ -487,7 +487,7 @@ function App() {
     addToast({
       type: "info",
       title: "Notification prompt dismissed",
-      message: "You can enable desktop notifications anytime in settings (🔔 icon).",
+      message: "You can enable desktop notifications anytime in settings (⚙️ icon).",
     });
   };
 
@@ -521,10 +521,10 @@ function App() {
               <>
                 <button
                   className="btn btn-small btn-ghost"
-                  onClick={() => setNotificationSettingsOpen(true)}
-                  title="Notification settings"
+                  onClick={() => setRoute(ROUTES.SETTINGS)}
+                  title="Settings"
                 >
-                  🔔
+                  ⚙️
                 </button>
                 <button className="btn btn-small btn-ghost" onClick={refreshTasks}>
                   Refresh
@@ -544,6 +544,13 @@ function App() {
 
       {!isAuthed ? (
         <AuthScreen route={route} onAuth={handleAuth} onToggleMode={onSwitchAuthMode} />
+      ) : route === ROUTES.SETTINGS ? (
+        <Settings
+          notificationSettings={notificationSettings}
+          onSaveNotificationSettings={handleSaveNotificationSettings}
+          onTestAlarm={handleTestAlarm}
+          onBack={() => setRoute(ROUTES.DASHBOARD)}
+        />
       ) : (
         <div className="container">
           <div className="layout">
@@ -644,20 +651,6 @@ function App() {
           onDismiss={handleDismissAlarm}
           onViewTask={handleViewAlarmTask}
         />
-      ) : null}
-
-      {notificationSettingsOpen ? (
-        <Modal
-          title="Notification Settings"
-          onClose={() => setNotificationSettingsOpen(false)}
-        >
-          <NotificationSettings
-            settings={notificationSettings}
-            onSave={handleSaveNotificationSettings}
-            onClose={() => setNotificationSettingsOpen(false)}
-            onTestAlarm={handleTestAlarm}
-          />
-        </Modal>
       ) : null}
 
       {showPermissionPrompt ? (

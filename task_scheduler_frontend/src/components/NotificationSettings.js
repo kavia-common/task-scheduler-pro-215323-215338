@@ -238,7 +238,7 @@ export default function NotificationSettings({ settings, onSave, onClose, onTest
         <strong>🎉 Background Tab Support:</strong> With desktop notifications enabled, alarms will trigger even when you're on a different tab or window!
       </div>
 
-      <div className="modal-footer">
+      <div style={{ marginTop: "24px", display: "flex", justifyContent: "flex-end", gap: "12px" }}>
         <button className="btn btn-ghost" onClick={onClose}>
           Cancel
         </button>

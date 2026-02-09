@@ -1,6 +1,16 @@
 /* Enhanced Retro Theme for Task Scheduler Pro
    Improved typography, spacing, accessibility, and visual polish */
 
+html {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 :root {
   /* Core colors */
   --bg: #0b1020;
@@ -710,6 +720,138 @@ a {
   text-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
 }
 
+/* Settings Page Styles */
+.settings-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+  gap: var(--space-lg);
+}
+
+.settings-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.settings-content {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.settings-sidebar {
+  border: 1px solid var(--border);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 90px;
+}
+
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.settings-nav-item {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition) ease;
+}
+
+.settings-nav-item:hover:not(:disabled) {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: var(--border);
+}
+
+.settings-nav-item.active {
+  background: rgba(34, 211, 238, 0.15);
+  border-color: var(--border-strong);
+  color: var(--text-bright);
+  font-weight: 700;
+}
+
+.settings-nav-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.settings-main {
+  border: 1px solid var(--border);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  min-height: 500px;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.settings-main::-webkit-scrollbar {
+  width: 8px;
+}
+
+.settings-main::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.settings-main::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.3);
+  border-radius: 4px;
+}
+
+.settings-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.5);
+}
+
+.settings-section {
+  padding: var(--space-xl);
+}
+
+.settings-section-header {
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-section-header h2 {
+  margin: 0 0 var(--space-sm) 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-bright);
+}
+
+.settings-section-header p {
+  margin: 0;
+}
+
+.settings-section-content {
+  /* Content wrapper for settings forms */
+}
+
 /* Enhanced modal styles */
 .modal-backdrop {
   position: fixed;
@@ -722,6 +864,7 @@ a {
   padding: var(--space-xl);
   z-index: 100;
   animation: fadeIn var(--transition-slow) ease;
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {
@@ -735,12 +878,15 @@ a {
 
 .modal {
   width: min(740px, 100%);
+  max-height: 90vh;
   border-radius: var(--radius-lg);
   border: 1px solid rgba(34, 211, 238, 0.25);
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(12px);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   animation: slideUp var(--transition-slow) ease;
 }
 
@@ -774,6 +920,27 @@ a {
 
 .modal-body {
   padding: var(--space-xl);
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.3);
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.5);
 }
 
 .modal-footer {
@@ -1030,6 +1197,13 @@ a {
   .header-right { 
     flex-direction: column;
     align-items: stretch;
+  }
+  .settings-content {
+    grid-template-columns: 1fr;
+  }
+  .settings-sidebar {
+    position: relative;
+    top: 0;
   }
 }
 
